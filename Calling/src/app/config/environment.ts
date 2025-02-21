@@ -1,5 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 export const environment = {
-  API_ENDPOINT: 'http://localhost:8080/'
+  API_ENDPOINT: 'https://celebrated-unity-production.up.railway.app/'
 };

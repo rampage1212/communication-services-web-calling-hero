@@ -4,6 +4,6 @@
 
 FROM node:18-alpine As development
 
-RUN npm setup
+RUN npm run setup
 
-RUN npm start
+RUN npm run start

@@ -1,7 +1,0 @@
-node_modules
-Calling/node_modules
-Server/node_modules
-.git
-.gitignore
-.env
-*/dist

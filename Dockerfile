@@ -4,6 +4,17 @@
 
 FROM node:18-alpine As development
 
-RUN npm run setup
+# Set working directory
+WORKDIR /app
 
-RUN npm run start
+# Copy package.json files
+COPY package*.json ./
+COPY Server/package*.json ./Server/
+COPY Calling/package*.json ./Calling/
+
+# Copy all other source code files
+COPY . .
+
+# Install dependencies and build
+RUN npm run setup
+CMD ["npm", "run", "start"]

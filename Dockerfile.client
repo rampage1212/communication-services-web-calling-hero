@@ -1,0 +1,21 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package.json files
+COPY package.json ./
+COPY Calling/package*.json ./Calling/
+
+# Copy client code
+COPY Calling/ ./Calling/
+
+# Install dependencies
+RUN cd Calling && npm install
+
+# Build the client
+RUN cd Calling && npm run build
+
+EXPOSE 3000
+
+# Start the client
+CMD cd Calling && npm start

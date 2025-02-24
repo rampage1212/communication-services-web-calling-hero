@@ -20,9 +20,6 @@ FROM node:18-alpine
 
 WORKDIR /app/Calling
 
-# Copy built files from builder stage
-COPY --from=builder ../Server/dist ./dist
-
 # Install production dependencies only
 RUN npm ci --only=production
 

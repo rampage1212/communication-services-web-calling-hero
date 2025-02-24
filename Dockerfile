@@ -18,11 +18,10 @@ RUN npm run package
 # Production stage
 FROM node:18-alpine
 
-WORKDIR /app
+WORKDIR /app/Calling
 
 # Copy built files from builder stage
-COPY --from=builder /app/Server/dist ./dist
-COPY --from=builder /app/Calling/package*.json ./
+COPY --from=builder ../Server/dist ./dist
 
 # Install production dependencies only
 RUN npm ci --only=production

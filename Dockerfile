@@ -4,15 +4,10 @@ FROM node:18-alpine as builder
 # Set working directory
 WORKDIR /app
 
-# Copy package files for both root and Calling directory
-COPY package*.json ./
-COPY Calling/package*.json ./Calling/
-
-# Install dependencies for root and Calling
-RUN npm run setup
-
 # Copy source files
 COPY . .
+
+RUN npm run setup
 
 # Build the application
 RUN npm run build
@@ -26,7 +21,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy built files from builder stage
-COPY --from=builder /app/Calling/dist ./dist
+COPY --from=builder /app/Server/dist ./dist
 COPY --from=builder /app/Calling/package*.json ./
 
 # Install production dependencies only

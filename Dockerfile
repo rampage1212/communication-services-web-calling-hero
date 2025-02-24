@@ -22,7 +22,7 @@ WORKDIR /app
 
 # Copy built files from builder stage
 COPY --from=builder /app/Calling/dist ./dist
-COPY --from=builder /app/Calling/package.json ./
+COPY --from=builder /app/Calling/package*.json ./
 
 # Install production dependencies only
 RUN npm ci --only=production

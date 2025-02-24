@@ -22,7 +22,6 @@ WORKDIR /app
 
 # Copy built files from builder stage
 COPY --from=builder /app/Calling/dist ./dist
-RUN rm package.json
 COPY --from=builder /app/Calling/package.json ./
 
 # Install production dependencies only

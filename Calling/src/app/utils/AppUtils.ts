@@ -12,7 +12,7 @@ import { v1 as generateGUID } from 'uuid';
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const fetchTokenResponse = async (): Promise<any> => {
-  const response = await fetch('token?scope=voip');
+  const response = await fetch('https://communication-services-web-calli-production.up.railway.app/token?scope=voip');
   if (response.ok) {
     const responseAsJson = await response.json();
     const token = responseAsJson.token;
@@ -47,7 +47,10 @@ export const createRoom = async (): Promise<string> => {
   const requestOptions = {
     method: 'POST'
   };
-  const response = await fetch(`createRoom`, requestOptions);
+  const response = await fetch(
+    `https://communication-services-web-calli-production.up.railway.app/createRoom`,
+    requestOptions
+  );
   if (!response.ok) {
     throw 'Unable to create room';
   }
@@ -67,7 +70,10 @@ export const addUserToRoom = async (userId: string, roomId: string, role: Partic
     },
     body: JSON.stringify({ userId: userId, roomId: roomId, role: role })
   };
-  const response = await fetch('addUserToRoom', requestOptions);
+  const response = await fetch(
+    'https://communication-services-web-calli-production.up.railway.app/addUserToRoom',
+    requestOptions
+  );
   if (!response.ok) {
     throw 'Unable to add user to room';
   }

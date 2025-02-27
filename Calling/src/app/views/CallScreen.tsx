@@ -88,7 +88,7 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
       }
 
       // Start translation when a participant is speaking
-      if (state?.call?.remoteParticipants) {
+      if (state.page === 'call' && state?.call?.remoteParticipants) {
         console.log('Participants:', Object.values(state.call.remoteParticipants));
         Object.values(state.call.remoteParticipants).forEach((participantState) => {
           const participant = participantState as unknown as RemoteParticipant;
@@ -244,8 +244,9 @@ const AzureCommunicationCallScreen = (props: AzureCommunicationCallScreenProps):
 
   // Initialize Speech Translation
   useEffect(() => {
-    const speechKey = 'YOUR_SPEECH_SERVICE_KEY'; // Replace with your Speech Service key
-    const speechRegion = 'YOUR_SPEECH_SERVICE_REGION'; // Replace with your Speech Service region
+    // Start capturing audio for translation
+    const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
+    const speechRegion = 'eastus'; // Replace with your Speech Service region
     const sourceLanguage = 'en-US'; // Source language (English)
     const targetLanguage = 'ja-JP'; // Target language (Japanese)
 

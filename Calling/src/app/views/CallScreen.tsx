@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
+
 import {
   AzureCommunicationTokenCredential,
   CommunicationUserIdentifier,
@@ -20,10 +22,38 @@ import {
   useTeamsCallAdapter
 } from '@azure/communication-react';
 import type { Profile, StartCallIdentifier, TeamsAdapterOptions } from '@azure/communication-react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { createAutoRefreshingCredential } from '../utils/credential';
 import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
+
+const initializeSpeechTranslation = (
+  speechKey: string,
+  speechRegion: string,
+  sourceLanguage: string,
+  targetLanguage: string
+) => {
+  const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
+  speechConfig.speechRecognitionLanguage = sourceLanguage; // Source language (e.g., "en-US")
+  speechConfig.addTargetLanguage(targetLanguage); // Target language (e.g., "ja-JP")
+
+  const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+  const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
+
+  recognizer.recognizing = (s, e) => {
+    console.log(`Translating: ${e.result.text}`);
+  };
+
+  recognizer.recognized = (s, e) => {
+    const translation = e.result.translations.get(targetLanguage); // Get translated text
+    console.log(`Translated: ${translation}`);
+    // Synthesize the translated text into speech
+    const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
+    synthesizer.speakTextAsync(translation);
+  };
+
+  recognizer.startContinuousRecognitionAsync();
+};
 
 export interface CallScreenProps {
   token: string;
@@ -45,6 +75,7 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
       // add top-level error handling logic here (e.g. reporting telemetry).
       console.log('Adapter error event:', e);
     });
+
     adapter.onStateChange((state: CallAdapterState) => {
       const pageTitle = convertPageStateToString(state);
       document.title = `${pageTitle} - ${WEB_APP_TITLE}`;
@@ -53,7 +84,23 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
         callIdRef.current = state?.call?.id;
         console.log(`Call Id: ${callIdRef.current}`);
       }
+
+      // Start translation when a participant is speaking
+      state?.call?.remoteParticipants.forEach((participant) => {
+        participant.on('isSpeakingChanged', () => {
+          if (participant.isSpeaking) {
+            // Start capturing audio for translation
+            const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
+            const speechRegion = 'eastus'; // Replace with your Speech Service region
+            const sourceLanguage = 'en-US'; // Source language (English)
+            const targetLanguage = 'ja-JP'; // Target language (Japanese)
+
+            initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
+          }
+        });
+      });
     });
+
     adapter.on('transferAccepted', (e) => {
       console.log('Call being transferred to: ' + e);
     });
@@ -184,6 +231,16 @@ const AzureCommunicationCallScreen = (props: AzureCommunicationCallScreenProps):
     },
     afterCreate
   );
+
+  // Initialize Speech Translation
+  useEffect(() => {
+    const speechKey = 'YOUR_SPEECH_SERVICE_KEY'; // Replace with your Speech Service key
+    const speechRegion = 'YOUR_SPEECH_SERVICE_REGION'; // Replace with your Speech Service region
+    const sourceLanguage = 'en-US'; // Source language (English)
+    const targetLanguage = 'ja-JP'; // Target language (Japanese)
+
+    initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
+  }, []);
 
   return <CallCompositeContainer {...props} adapter={adapter} />;
 };

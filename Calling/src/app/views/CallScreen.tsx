@@ -22,6 +22,7 @@ import {
   useTeamsCallAdapter
 } from '@azure/communication-react';
 import type { Profile, StartCallIdentifier, TeamsAdapterOptions } from '@azure/communication-react';
+import { RemoteParticipant } from '@azure/communication-calling';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { createAutoRefreshingCredential } from '../utils/credential';
 import { WEB_APP_TITLE } from '../utils/AppUtils';
@@ -86,19 +87,22 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
       }
 
       // Start translation when a participant is speaking
-      state?.call?.remoteParticipants.forEach((participant) => {
-        participant.on('isSpeakingChanged', () => {
-          if (participant.isSpeaking) {
-            // Start capturing audio for translation
-            const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-            const speechRegion = 'eastus'; // Replace with your Speech Service region
-            const sourceLanguage = 'en-US'; // Source language (English)
-            const targetLanguage = 'ja-JP'; // Target language (Japanese)
+      if (state?.call?.remoteParticipants) {
+        Object.values(state.call.remoteParticipants).forEach((participantState) => {
+          const participant = participantState as unknown as RemoteParticipant;
+          participant.on('isSpeakingChanged', () => {
+            if (participant.isSpeaking) {
+              // Start capturing audio for translation
+              const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
+              const speechRegion = 'eastus'; // Replace with your Speech Service region
+              const sourceLanguage = 'en-US'; // Source language (English)
+              const targetLanguage = 'ja-JP'; // Target language (Japanese)
 
-            initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
-          }
+              initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
+            }
+          });
         });
-      });
+      }
     });
 
     adapter.on('transferAccepted', (e) => {

@@ -78,6 +78,7 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
     });
 
     adapter.onStateChange((state: CallAdapterState) => {
+      console.log('Call State:', state.page);
       const pageTitle = convertPageStateToString(state);
       document.title = `${pageTitle} - ${WEB_APP_TITLE}`;
 
@@ -88,6 +89,7 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
 
       // Start translation when a participant is speaking
       if (state?.call?.remoteParticipants) {
+        console.log('Participants:', Object.values(state.call.remoteParticipants));
         Object.values(state.call.remoteParticipants).forEach((participantState) => {
           const participant = participantState as unknown as RemoteParticipant;
           participant.on('isSpeakingChanged', () => {
@@ -98,7 +100,11 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
               const sourceLanguage = 'en-US'; // Source language (English)
               const targetLanguage = 'ja-JP'; // Target language (Japanese)
 
-              initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
+              try {
+                initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
+              } catch (error) {
+                console.error('Translation initialization failed:', error);
+              }
             }
           });
         });

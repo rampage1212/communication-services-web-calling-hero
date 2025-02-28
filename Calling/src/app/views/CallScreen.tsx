@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
+// import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
 
 import {
   AzureCommunicationTokenCredential,
@@ -28,33 +28,33 @@ import { createAutoRefreshingCredential } from '../utils/credential';
 import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
 
-const initializeSpeechTranslation = (
-  speechKey: string,
-  speechRegion: string,
-  sourceLanguage: string,
-  targetLanguage: string
-) => {
-  const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
-  speechConfig.speechRecognitionLanguage = sourceLanguage; // Source language (e.g., "en-US")
-  speechConfig.addTargetLanguage(targetLanguage); // Target language (e.g., "ja-JP")
+// const initializeSpeechTranslation = (
+//   speechKey: string,
+//   speechRegion: string,
+//   sourceLanguage: string,
+//   targetLanguage: string
+// ) => {
+//   const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
+//   speechConfig.speechRecognitionLanguage = sourceLanguage; // Source language (e.g., "en-US")
+//   speechConfig.addTargetLanguage(targetLanguage); // Target language (e.g., "ja-JP")
 
-  const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
-  const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
+//   const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+//   const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
 
-  recognizer.recognizing = (s, e) => {
-    console.log(`Translating: ${e.result.text}`);
-  };
+//   recognizer.recognizing = (s, e) => {
+//     console.log(`Translating: ${e.result.text}`);
+//   };
 
-  recognizer.recognized = (s, e) => {
-    const translation = e.result.translations.get(targetLanguage); // Get translated text
-    console.log(`Translated: ${translation}`);
-    // Synthesize the translated text into speech
-    const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
-    synthesizer.speakTextAsync(translation);
-  };
+//   recognizer.recognized = (s, e) => {
+//     const translation = e.result.translations.get(targetLanguage); // Get translated text
+//     console.log(`Translated: ${translation}`);
+//     // Synthesize the translated text into speech
+//     const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
+//     synthesizer.speakTextAsync(translation);
+//   };
 
-  recognizer.startContinuousRecognitionAsync();
-};
+//   recognizer.startContinuousRecognitionAsync();
+// };
 
 export interface CallScreenProps {
   token: string;

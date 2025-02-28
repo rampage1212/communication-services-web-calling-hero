@@ -88,7 +88,11 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
       }
 
       // Start translation when a participant is speaking
-      if (state.page === 'call' && state?.call?.remoteParticipants) {
+      if (
+        state.page === 'call' &&
+        state?.call?.remoteParticipants &&
+        Object.values(state.call.remoteParticipants).length > 0
+      ) {
         console.log('Participants:', Object.values(state.call.remoteParticipants));
         Object.values(state.call.remoteParticipants).forEach((participantState) => {
           const participant = participantState as unknown as RemoteParticipant;

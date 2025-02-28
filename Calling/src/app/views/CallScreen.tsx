@@ -86,7 +86,12 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
         callIdRef.current = state?.call?.id;
         console.log(`Call Id: ${callIdRef.current}`);
       }
-
+      const handler = () => {
+        console.log('called handler function');
+        // if (participant.isSpeaking) {
+        //   console.log('isSpeakingChanged');
+        // }
+      };
       // Start translation when a participant is speaking
       if (
         state.page === 'call' &&
@@ -96,13 +101,6 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
         console.log('Participants:', Object.values(state.call.remoteParticipants));
         Object.values(state.call.remoteParticipants).forEach((participantState) => {
           const participant = participantState as unknown as RemoteParticipant;
-          console.log('participant:: ', participant);
-          const handler = () => {
-            console.log('called handler function');
-            if (participant.isSpeaking) {
-              console.log('isSpeakingChanged');
-            }
-          };
           console.log('participant:: ', participant);
           participant.on('isSpeakingChanged', handler);
           // participant.on('isSpeakingChanged', () => {

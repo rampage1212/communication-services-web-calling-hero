@@ -254,16 +254,16 @@ const AzureCommunicationCallScreen = (props: AzureCommunicationCallScreenProps):
     afterCreate
   );
 
-  // Initialize Speech Translation
-  useEffect(() => {
-    // Start capturing audio for translation
-    const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-    const speechRegion = 'eastus'; // Replace with your Speech Service region
-    const sourceLanguage = 'en-US'; // Source language (English)
-    const targetLanguage = 'ja-JP'; // Target language (Japanese)
+  // // Initialize Speech Translation
+  // useEffect(() => {
+  //   // Start capturing audio for translation
+  //   const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
+  //   const speechRegion = 'eastus'; // Replace with your Speech Service region
+  //   const sourceLanguage = 'en-US'; // Source language (English)
+  //   const targetLanguage = 'ja-JP'; // Target language (Japanese)
 
-    initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
-  }, []);
+  //   initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
+  // }, []);
 
   return <CallCompositeContainer {...props} adapter={adapter} />;
 };

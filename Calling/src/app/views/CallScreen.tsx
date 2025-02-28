@@ -97,6 +97,14 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
         Object.values(state.call.remoteParticipants).forEach((participantState) => {
           const participant = participantState as unknown as RemoteParticipant;
           console.log('participant:: ', participant);
+          const handler = () => {
+            console.log('called handler function');
+            if (participant.isSpeaking) {
+              console.log('isSpeakingChanged');
+            }
+          };
+          console.log('participant:: ', participant);
+          participant.on('isSpeakingChanged', handler);
           // participant.on('isSpeakingChanged', () => {
           //   if (participant.isSpeaking) {
           //     console.log('participant.isSpeaking: ', participant.isSpeaking);

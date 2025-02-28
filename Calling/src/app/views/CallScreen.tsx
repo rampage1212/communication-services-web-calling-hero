@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-// import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
+import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
 
 import {
   AzureCommunicationTokenCredential,
@@ -23,38 +23,38 @@ import {
 } from '@azure/communication-react';
 import type { Profile, StartCallIdentifier, TeamsAdapterOptions } from '@azure/communication-react';
 import { RemoteParticipant } from '@azure/communication-calling';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { createAutoRefreshingCredential } from '../utils/credential';
 import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
 
-// const initializeSpeechTranslation = (
-//   speechKey: string,
-//   speechRegion: string,
-//   sourceLanguage: string,
-//   targetLanguage: string
-// ) => {
-//   const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
-//   speechConfig.speechRecognitionLanguage = sourceLanguage; // Source language (e.g., "en-US")
-//   speechConfig.addTargetLanguage(targetLanguage); // Target language (e.g., "ja-JP")
+const initializeSpeechTranslation = (
+  speechKey: string,
+  speechRegion: string,
+  sourceLanguage: string,
+  targetLanguage: string
+) => {
+  const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
+  speechConfig.speechRecognitionLanguage = sourceLanguage; // Source language (e.g., "en-US")
+  speechConfig.addTargetLanguage(targetLanguage); // Target language (e.g., "ja-JP")
 
-//   const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
-//   const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
+  const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+  const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
 
-//   recognizer.recognizing = (s, e) => {
-//     console.log(`Translating: ${e.result.text}`);
-//   };
+  recognizer.recognizing = (s, e) => {
+    console.log(`Translating: ${e.result.text}`);
+  };
 
-//   recognizer.recognized = (s, e) => {
-//     const translation = e.result.translations.get(targetLanguage); // Get translated text
-//     console.log(`Translated: ${translation}`);
-//     // Synthesize the translated text into speech
-//     const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
-//     synthesizer.speakTextAsync(translation);
-//   };
+  recognizer.recognized = (s, e) => {
+    const translation = e.result.translations.get(targetLanguage); // Get translated text
+    console.log(`Translated: ${translation}`);
+    // Synthesize the translated text into speech
+    const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
+    synthesizer.speakTextAsync(translation);
+  };
 
-//   recognizer.startContinuousRecognitionAsync();
-// };
+  recognizer.startContinuousRecognitionAsync();
+};
 
 export interface CallScreenProps {
   token: string;
@@ -86,12 +86,6 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
         callIdRef.current = state?.call?.id;
         console.log(`Call Id: ${callIdRef.current}`);
       }
-      const handler = () => {
-        console.log('called handler function');
-        // if (participant.isSpeaking) {
-        //   console.log('isSpeakingChanged');
-        // }
-      };
       // Start translation when a participant is speaking
       if (
         state.page === 'call' &&
@@ -102,7 +96,6 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
         Object.values(state.call.remoteParticipants).forEach((participantState) => {
           const participant = participantState as unknown as RemoteParticipant;
           console.log('participant:: ', participant);
-          participant.on('isSpeakingChanged', handler);
           // participant.on('isSpeakingChanged', () => {
           //   if (participant.isSpeaking) {
           //     console.log('participant.isSpeaking: ', participant.isSpeaking);
@@ -254,16 +247,16 @@ const AzureCommunicationCallScreen = (props: AzureCommunicationCallScreenProps):
     afterCreate
   );
 
-  // // Initialize Speech Translation
-  // useEffect(() => {
-  //   // Start capturing audio for translation
-  //   const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-  //   const speechRegion = 'eastus'; // Replace with your Speech Service region
-  //   const sourceLanguage = 'en-US'; // Source language (English)
-  //   const targetLanguage = 'ja-JP'; // Target language (Japanese)
+  // Initialize Speech Translation
+  useEffect(() => {
+    // Start capturing audio for translation
+    const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
+    const speechRegion = 'eastus'; // Replace with your Speech Service region
+    const sourceLanguage = 'en-US'; // Source language (English)
+    const targetLanguage = 'ja-JP'; // Target language (Japanese)
 
-  //   initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
-  // }, []);
+    initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
+  }, []);
 
   return <CallCompositeContainer {...props} adapter={adapter} />;
 };

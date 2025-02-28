@@ -94,24 +94,24 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
         Object.values(state.call.remoteParticipants).length > 0
       ) {
         console.log('Participants:', Object.values(state.call.remoteParticipants));
-        Object.values(state.call.remoteParticipants).forEach((participantState) => {
-          const participant = participantState as unknown as RemoteParticipant;
-          participant.on('isSpeakingChanged', () => {
-            if (participant.isSpeaking) {
-              // Start capturing audio for translation
-              const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-              const speechRegion = 'eastus'; // Replace with your Speech Service region
-              const sourceLanguage = 'en-US'; // Source language (English)
-              const targetLanguage = 'ja-JP'; // Target language (Japanese)
+        // Object.values(state.call.remoteParticipants).forEach((participantState) => {
+        //   const participant = participantState as unknown as RemoteParticipant;
+        //   participant.on('isSpeakingChanged', () => {
+        //     if (participant.isSpeaking) {
+        //       // Start capturing audio for translation
+        //       const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
+        //       const speechRegion = 'eastus'; // Replace with your Speech Service region
+        //       const sourceLanguage = 'en-US'; // Source language (English)
+        //       const targetLanguage = 'ja-JP'; // Target language (Japanese)
 
-              try {
-                initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
-              } catch (error) {
-                console.error('Translation initialization failed:', error);
-              }
-            }
-          });
-        });
+        //       try {
+        //         initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
+        //       } catch (error) {
+        //         console.error('Translation initialization failed:', error);
+        //       }
+        //     }
+        //   });
+        // });
       }
     });
 

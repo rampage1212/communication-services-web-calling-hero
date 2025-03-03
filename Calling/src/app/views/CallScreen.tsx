@@ -105,7 +105,8 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
     });
 
     adapter.onStateChange((state: CallAdapterState) => {
-      console.log('Call State:', state.page);
+      console.log('Call State:', state);
+      console.log('Call State Page:', state.page);
       const pageTitle = convertPageStateToString(state);
       document.title = `${pageTitle} - ${WEB_APP_TITLE}`;
 

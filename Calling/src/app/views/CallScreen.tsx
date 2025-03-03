@@ -22,8 +22,7 @@ import {
   useTeamsCallAdapter
 } from '@azure/communication-react';
 import type { Profile, StartCallIdentifier, TeamsAdapterOptions } from '@azure/communication-react';
-import { RemoteParticipant } from '@azure/communication-calling';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { createAutoRefreshingCredential } from '../utils/credential';
 import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
@@ -94,24 +93,20 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
       ) {
         console.log('Participants:', Object.values(state.call.remoteParticipants));
         Object.values(state.call.remoteParticipants).forEach((participantState) => {
-          const participant = participantState as unknown as RemoteParticipant;
-          console.log('participant:: ', participant);
-          // participant.on('isSpeakingChanged', () => {
-          //   if (participant.isSpeaking) {
-          //     console.log('participant.isSpeaking: ', participant.isSpeaking);
-          //     // Start capturing audio for translation
-          //     const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-          //     const speechRegion = 'eastus'; // Replace with your Speech Service region
-          //     const sourceLanguage = 'en-US'; // Source language (English)
-          //     const targetLanguage = 'ja-JP'; // Target language (Japanese)
+          if (participantState.isSpeaking) {
+            console.log('isSpeaking is true');
 
-          //     try {
-          //       initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
-          //     } catch (error) {
-          //       console.error('Translation initialization failed:', error);
-          //     }
-          //   }
-          // });
+            const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk';
+            const speechRegion = 'eastus'; // Replace with your Speech Service region
+            const sourceLanguage = 'en-US'; // Source language (English)
+            const targetLanguage = 'ja-JP'; // Target language (Japanese)
+
+            try {
+              initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
+            } catch (error) {
+              console.error('Translation initialization failed:', error);
+            }
+          }
         });
       }
     });
@@ -248,15 +243,15 @@ const AzureCommunicationCallScreen = (props: AzureCommunicationCallScreenProps):
   );
 
   // Initialize Speech Translation
-  useEffect(() => {
-    // Start capturing audio for translation
-    const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-    const speechRegion = 'eastus'; // Replace with your Speech Service region
-    const sourceLanguage = 'en-US'; // Source language (English)
-    const targetLanguage = 'ja-JP'; // Target language (Japanese)
+  // useEffect(() => {
+  //   // Start capturing audio for translation
+  //   const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
+  //   const speechRegion = 'eastus'; // Replace with your Speech Service region
+  //   const sourceLanguage = 'en-US'; // Source language (English)
+  //   const targetLanguage = 'ja-JP'; // Target language (Japanese)
 
-    initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
-  }, []);
+  //   initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
+  // }, []);
 
   return <CallCompositeContainer {...props} adapter={adapter} />;
 };

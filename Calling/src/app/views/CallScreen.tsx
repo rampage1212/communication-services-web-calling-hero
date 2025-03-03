@@ -49,7 +49,7 @@ const initializeSpeechTranslation = (
     console.log(`Translated: ${translation}`);
     // Synthesize the translated text into speech
     const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
-    synthesizer.speakTextAsync(translation);
+    synthesizer.speakTextAsync('Hey hey, say like this, Amazing!');
   };
 
   recognizer.startContinuousRecognitionAsync();

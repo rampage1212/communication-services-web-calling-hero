@@ -25,16 +25,12 @@ import { createAutoRefreshingCredential } from '../utils/credential';
 // import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
 import OpenAI from 'openai';
+import 'dotenv/config';
 
-// import dotenv from 'dotenv';
-
-// dotenv.config();
-
-// const apiKey = process.env.OPEN_API_KEY;
+const apiKey = process.env.OPEN_API_KEY;
 
 const openai = new OpenAI({
-  apiKey: 'sk', // Replace with your OpenAI API key
-  defaultQuery: { model: 'gpt-4o-mini-realtime-preview-2024-12-17' } // Specify the model here
+  apiKey // Replace with your OpenAI API key
 });
 
 const translateTextWithOpenAI = async (text: string, targetLanguage: string): Promise<string> => {

@@ -21,6 +21,9 @@
   },
   "homepage": "https://github.com/Azure-Samples/communication-services-web-calling-hero#readme",
   "dependencies": {
-    "dotenv": "^16.4.7"
+    "crypto-browserify": "^3.12.1",
+    "dotenv": "^16.4.7",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1"
   }
 }

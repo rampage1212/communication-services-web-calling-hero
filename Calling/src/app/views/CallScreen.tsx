@@ -52,33 +52,33 @@ const initializeSpeechTranslation = (
   //   synthesizer.speakTextAsync('Hey hey, say like this, Amazing!');
   // };
 
-  recognizer.recognized = (s, e) => {
-    if (e.result.reason === SpeechSDK.ResultReason.TranslatedSpeech) {
-      const languageCode = targetLanguage.split('-')[0]; // Extract base language code
-      const translation = e.result.translations.get(languageCode);
+  // recognizer.recognized = (s, e) => {
+  //   if (e.result.reason === SpeechSDK.ResultReason.TranslatedSpeech) {
+  //     const languageCode = targetLanguage.split('-')[0]; // Extract base language code
+  //     const translation = e.result.translations.get(languageCode);
 
-      if (!translation) {
-        console.error(`No translation found for ${languageCode}`);
-        return;
-      }
+  //     if (!translation) {
+  //       console.error(`No translation found for ${languageCode}`);
+  //       return;
+  //     }
 
-      console.log(`Translated: ${translation}`);
+  //     console.log(`Translated: ${translation}`);
 
-      // Separate speech config for synthesis
-      const synthConfig = SpeechSDK.SpeechConfig.fromSubscription(speechKey, speechRegion);
-      synthConfig.speechSynthesisLanguage = targetLanguage; // Now use full locale
+  //     // Separate speech config for synthesis
+  //     const synthConfig = SpeechSDK.SpeechConfig.fromSubscription(speechKey, speechRegion);
+  //     synthConfig.speechSynthesisLanguage = targetLanguage; // Now use full locale
 
-      const synthesizer = new SpeechSDK.SpeechSynthesizer(synthConfig);
-      synthesizer.speakTextAsync(translation, (result) => {
-        if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
-          console.log('Speech synthesis succeeded');
-        } else {
-          console.error('Speech synthesis failed:', result.errorDetails);
-        }
-        synthesizer.close();
-      });
-    }
-  };
+  //     const synthesizer = new SpeechSDK.SpeechSynthesizer(synthConfig);
+  //     synthesizer.speakTextAsync(translation, (result) => {
+  //       if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
+  //         console.log('Speech synthesis succeeded');
+  //       } else {
+  //         console.error('Speech synthesis failed:', result.errorDetails);
+  //       }
+  //       synthesizer.close();
+  //     });
+  //   }
+  // };
 
   recognizer.startContinuousRecognitionAsync();
 };

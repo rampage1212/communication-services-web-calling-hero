@@ -22,9 +22,9 @@ import {
   useTeamsCallAdapter
 } from '@azure/communication-react';
 import type { Profile, StartCallIdentifier, TeamsAdapterOptions } from '@azure/communication-react';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { createAutoRefreshingCredential } from '../utils/credential';
-import { WEB_APP_TITLE } from '../utils/AppUtils';
+// import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
 
 export interface CallScreenProps {
@@ -264,20 +264,20 @@ const AzureCommunicationOutboundCallScreen = (props: AzureCommunicationCallScree
   return <CallCompositeContainer {...props} adapter={adapter} />;
 };
 
-const convertPageStateToString = (state: CallAdapterState): string => {
-  switch (state.page) {
-    case 'accessDeniedTeamsMeeting':
-      return 'error';
-    case 'badRequest':
-      return 'error';
-    case 'leftCall':
-      return 'end call';
-    case 'removedFromCall':
-      return 'end call';
-    default:
-      return `${state.page}`;
-  }
-};
+// const convertPageStateToString = (state: CallAdapterState): string => {
+//   switch (state.page) {
+//     case 'accessDeniedTeamsMeeting':
+//       return 'error';
+//     case 'badRequest':
+//       return 'error';
+//     case 'leftCall':
+//       return 'end call';
+//     case 'removedFromCall':
+//       return 'end call';
+//     default:
+//       return `${state.page}`;
+//   }
+// };
 
 const videoBackgroundImages = [
   {

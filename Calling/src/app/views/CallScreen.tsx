@@ -1,5 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
 

@@ -31,7 +31,8 @@ const hey =
   '0CYrlDtiKULK3jT53r2ZvvK5UrS2L0WaTvd1g2J61TjUMlQiFIHxzpQSlChCOmiTlZU7lyLoG3T3BlbkFJ4uA9dVDHaK6HJiyaZBhTOtPKmuxwVzuPTa8qQrwx9woxXPo_hSorJ9hrNhi9mwLxqdOhB_rtcA';
 
 const openai = new OpenAI({
-  apiKey: stress + hey // Replace with your OpenAI API key
+  apiKey: stress + hey, // Replace with your OpenAI API key
+  dangerouslyAllowBrowser: true
 });
 
 const translateTextWithOpenAI = async (text: string, targetLanguage: string): Promise<string> => {

@@ -25,6 +25,33 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { createAutoRefreshingCredential } from '../utils/credential';
 // import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
+import OpenAI from 'openai';
+
+const apiKey = process.env.OPEN_API_KEY;
+
+const openai = new OpenAI({
+  apiKey, // Replace with your OpenAI API key
+  defaultQuery: { model: 'gpt-4o-mini-realtime-preview-2024-12-17' } // Specify the model here
+});
+
+const translateTextWithOpenAI = async (text: string, targetLanguage: string): Promise<string> => {
+  try {
+    const response = await openai.chat.completions.create({
+      messages: [
+        {
+          role: 'system',
+          content: `Translate the following text to ${targetLanguage}:`
+        },
+        { role: 'user', content: text }
+      ],
+      model: 'gpt-4o-mini-realtime-preview-2024-12-17'
+    });
+    return response.choices[0].message.content || text; // Return translated text or original if translation fails
+  } catch (error) {
+    console.error('Error translating text with OpenAI:', error);
+    return text; // Fallback to original text on error
+  }
+};
 
 export interface CallScreenProps {
   token: string;
@@ -107,11 +134,26 @@ const TeamsCallScreen = (props: TeamsCallScreenProps): JSX.Element => {
         videoBackgroundImages
       },
       reactionResources: {
-        likeReaction: { url: 'assets/reactions/likeEmoji.png', frameCount: 102 },
-        heartReaction: { url: 'assets/reactions/heartEmoji.png', frameCount: 102 },
-        laughReaction: { url: 'assets/reactions/laughEmoji.png', frameCount: 102 },
-        applauseReaction: { url: 'assets/reactions/clapEmoji.png', frameCount: 102 },
-        surprisedReaction: { url: 'assets/reactions/surprisedEmoji.png', frameCount: 102 }
+        likeReaction: {
+          url: 'assets/reactions/likeEmoji.png',
+          frameCount: 102
+        },
+        heartReaction: {
+          url: 'assets/reactions/heartEmoji.png',
+          frameCount: 102
+        },
+        laughReaction: {
+          url: 'assets/reactions/laughEmoji.png',
+          frameCount: 102
+        },
+        applauseReaction: {
+          url: 'assets/reactions/clapEmoji.png',
+          frameCount: 102
+        },
+        surprisedReaction: {
+          url: 'assets/reactions/surprisedEmoji.png',
+          frameCount: 102
+        }
       }
     }),
     []
@@ -157,11 +199,26 @@ const AzureCommunicationCallScreen = (props: AzureCommunicationCallScreenProps):
         callBusy: { url: 'assets/sounds/callBusy.mp3' }
       },
       reactionResources: {
-        likeReaction: { url: 'assets/reactions/likeEmoji.png', frameCount: 102 },
-        heartReaction: { url: 'assets/reactions/heartEmoji.png', frameCount: 102 },
-        laughReaction: { url: 'assets/reactions/laughEmoji.png', frameCount: 102 },
-        applauseReaction: { url: 'assets/reactions/clapEmoji.png', frameCount: 102 },
-        surprisedReaction: { url: 'assets/reactions/surprisedEmoji.png', frameCount: 102 }
+        likeReaction: {
+          url: 'assets/reactions/likeEmoji.png',
+          frameCount: 102
+        },
+        heartReaction: {
+          url: 'assets/reactions/heartEmoji.png',
+          frameCount: 102
+        },
+        laughReaction: {
+          url: 'assets/reactions/laughEmoji.png',
+          frameCount: 102
+        },
+        applauseReaction: {
+          url: 'assets/reactions/clapEmoji.png',
+          frameCount: 102
+        },
+        surprisedReaction: {
+          url: 'assets/reactions/surprisedEmoji.png',
+          frameCount: 102
+        }
       },
       alternateCallerId: adapterArgs.alternateCallerId
     };
@@ -187,22 +244,32 @@ const AzureCommunicationCallScreen = (props: AzureCommunicationCallScreenProps):
 
       const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
       speechConfig.speechRecognitionLanguage = sourceLanguage;
-      speechConfig.addTargetLanguage(targetLanguage);
+      // speechConfig.addTargetLanguage(targetLanguage);
 
       const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
       const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
 
-      recognizer.recognizing = (s, e) => {
-        console.log(`Recognizing: ${e.result.text}`);
-        // Send the translated text to the other participant
-        // You can use the adapter to send messages or update the UI
-      };
+      // recognizer.recognizing = async (s, e) => {
+      //   const recognizedText = e.result.text;
+      //   console.log(`Recognizing: ${recognizedText}`);
 
-      recognizer.recognized = (s, e) => {
+      //   // Translate recognized text using OpenAI
+      //   const translatedText = await translateTextWithOpenAI(recognizedText, targetLanguage);
+      //   console.log(`Translated: ${translatedText}`);
+
+      //   // Send the translated text to the other participant or update the UI
+      // };
+
+      recognizer.recognized = async (s, e) => {
         if (e.result.reason === SpeechSDK.ResultReason.TranslatedSpeech) {
-          console.log(`Translated: ${e.result.translations.get(targetLanguage)}`);
-          // Send the translated text to the other participant
-          // You can use the adapter to send messages or update the UI
+          const recognizedText = e.result.text;
+          console.log(`Recognized: ${recognizedText}`);
+
+          // Translate recognized text using OpenAI
+          const translatedText = await translateTextWithOpenAI(recognizedText, targetLanguage);
+          console.log(`Translated: ${translatedText}`);
+
+          // Send the translated text to the other participant or update the UI
         }
       };
 
@@ -234,11 +301,26 @@ const AzureCommunicationOutboundCallScreen = (props: AzureCommunicationCallScree
         callBusy: { url: 'assets/sounds/callBusy.mp3' }
       },
       reactionResources: {
-        likeReaction: { url: 'assets/reactions/likeEmoji.png', frameCount: 102 },
-        heartReaction: { url: 'assets/reactions/heartEmoji.png', frameCount: 102 },
-        laughReaction: { url: 'assets/reactions/laughEmoji.png', frameCount: 102 },
-        applauseReaction: { url: 'assets/reactions/clapEmoji.png', frameCount: 102 },
-        surprisedReaction: { url: 'assets/reactions/surprisedEmoji.png', frameCount: 102 }
+        likeReaction: {
+          url: 'assets/reactions/likeEmoji.png',
+          frameCount: 102
+        },
+        heartReaction: {
+          url: 'assets/reactions/heartEmoji.png',
+          frameCount: 102
+        },
+        laughReaction: {
+          url: 'assets/reactions/laughEmoji.png',
+          frameCount: 102
+        },
+        applauseReaction: {
+          url: 'assets/reactions/clapEmoji.png',
+          frameCount: 102
+        },
+        surprisedReaction: {
+          url: 'assets/reactions/surprisedEmoji.png',
+          frameCount: 102
+        }
       },
       onFetchProfile: async (userId: string, defaultProfile?: Profile): Promise<Profile | undefined> => {
         if (userId === '<28:orgid:Enter your teams app here>') {

@@ -26,14 +26,14 @@ import { createAutoRefreshingCredential } from '../utils/credential';
 import { CallCompositeContainer } from './CallCompositeContainer';
 import OpenAI from 'openai';
 
-import dotenv from 'dotenv';
+// import dotenv from 'dotenv';
 
-dotenv.config();
+// dotenv.config();
 
-const apiKey = process.env.OPEN_API_KEY;
+// const apiKey = process.env.OPEN_API_KEY;
 
 const openai = new OpenAI({
-  apiKey, // Replace with your OpenAI API key
+  apiKey: 'sk', // Replace with your OpenAI API key
   defaultQuery: { model: 'gpt-4o-mini-realtime-preview-2024-12-17' } // Specify the model here
 });
 

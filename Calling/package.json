@@ -30,6 +30,7 @@
     "@fluentui/react": "^8.121.11",
     "@fluentui/react-hooks": "^8.8.16",
     "@fluentui/react-icons": "^2.0.266",
+    "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.1",
     "dotenv": "^16.4.7",
     "follow-redirects": "1.15.6",
@@ -47,7 +48,9 @@
     "react-speech-recognition": "^3.10.0",
     "reselect": "^4.0.0",
     "shake.js": "1.2.2",
-    "uuid": "^9.0.0"
+    "stream-browserify": "^3.0.0",
+    "uuid": "^9.0.0",
+    "vm-browserify": "^1.1.2"
   },
   "devDependencies": {
     "@babel/core": "~7.16.0",

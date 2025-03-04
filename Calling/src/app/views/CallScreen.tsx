@@ -102,6 +102,52 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
     return createAutoRefreshingCredential(toFlatCommunicationIdentifier(userId), token);
   }, [token, userId, isTeamsIdentityCall]);
 
+  // Initialize Speech Translation
+  useEffect(() => {
+    const initializeSpeechTranslation = async () => {
+      console.log('initializeSpeechTranslation called');
+      const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
+      const speechRegion = 'eastus'; // Replace with your Speech Service region
+      const sourceLanguage = 'en-US'; // Source language (English)
+      const targetLanguage = 'ja-JP'; // Target language (Japanese)
+
+      const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
+      speechConfig.speechRecognitionLanguage = sourceLanguage;
+      // speechConfig.addTargetLanguage(targetLanguage);
+
+      const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+      const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
+
+      // recognizer.recognizing = async (s, e) => {
+      //   const recognizedText = e.result.text;
+      //   console.log(`Recognizing: ${recognizedText}`);
+
+      //   // Translate recognized text using OpenAI
+      //   const translatedText = await translateTextWithOpenAI(recognizedText, targetLanguage);
+      //   console.log(`Translated: ${translatedText}`);
+
+      //   // Send the translated text to the other participant or update the UI
+      // };
+
+      recognizer.recognized = async (s, e) => {
+        if (e.result.reason === SpeechSDK.ResultReason.TranslatedSpeech) {
+          const recognizedText = e.result.text;
+          console.log(`Recognized: ${recognizedText}`);
+
+          // Translate recognized text using OpenAI
+          const translatedText = await translateTextWithOpenAI(recognizedText, targetLanguage);
+          console.log(`Translated: ${translatedText}`);
+
+          // Send the translated text to the other participant or update the UI
+        }
+      };
+
+      recognizer.startContinuousRecognitionAsync();
+    };
+
+    initializeSpeechTranslation();
+  }, []);
+
   if (isTeamsIdentityCall) {
     return <TeamsCallScreen afterCreate={afterTeamsCallAdapterCreate} credential={credential} {...props} />;
   }
@@ -234,51 +280,6 @@ const AzureCommunicationCallScreen = (props: AzureCommunicationCallScreenProps):
     },
     afterCreate
   );
-
-  // Initialize Speech Translation
-  useEffect(() => {
-    const initializeSpeechTranslation = async () => {
-      const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-      const speechRegion = 'eastus'; // Replace with your Speech Service region
-      const sourceLanguage = 'en-US'; // Source language (English)
-      const targetLanguage = 'ja-JP'; // Target language (Japanese)
-
-      const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
-      speechConfig.speechRecognitionLanguage = sourceLanguage;
-      // speechConfig.addTargetLanguage(targetLanguage);
-
-      const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
-      const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
-
-      // recognizer.recognizing = async (s, e) => {
-      //   const recognizedText = e.result.text;
-      //   console.log(`Recognizing: ${recognizedText}`);
-
-      //   // Translate recognized text using OpenAI
-      //   const translatedText = await translateTextWithOpenAI(recognizedText, targetLanguage);
-      //   console.log(`Translated: ${translatedText}`);
-
-      //   // Send the translated text to the other participant or update the UI
-      // };
-
-      recognizer.recognized = async (s, e) => {
-        if (e.result.reason === SpeechSDK.ResultReason.TranslatedSpeech) {
-          const recognizedText = e.result.text;
-          console.log(`Recognized: ${recognizedText}`);
-
-          // Translate recognized text using OpenAI
-          const translatedText = await translateTextWithOpenAI(recognizedText, targetLanguage);
-          console.log(`Translated: ${translatedText}`);
-
-          // Send the translated text to the other participant or update the UI
-        }
-      };
-
-      recognizer.startContinuousRecognitionAsync();
-    };
-
-    initializeSpeechTranslation();
-  }, []);
 
   return <CallCompositeContainer {...props} adapter={adapter} />;
 };

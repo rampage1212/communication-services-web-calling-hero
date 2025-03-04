@@ -37,11 +37,15 @@ const initializeSpeechTranslation = (
   speechConfig.speechRecognitionLanguage = sourceLanguage; // Source language (e.g., "en-US")
   speechConfig.addTargetLanguage(targetLanguage); // Target language (e.g., "ja-JP")
 
-  const audioConfig = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
+  const audioConfig = SpeechSDK.AudioConfig.fromMicrophoneInput();
   const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
 
   recognizer.recognizing = (s, e) => {
-    console.log(`Translating: ${e.result.text}`);
+    console.log(`recognizing Translating+++: ${e.result.text}`);
+  };
+
+  recognizer.recognized = (s, e) => {
+    console.log(`recognized Translating---: ${e.result.text}`);
   };
 
   // recognizer.recognized = (s, e) => {

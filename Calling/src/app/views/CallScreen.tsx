@@ -27,74 +27,6 @@ import { createAutoRefreshingCredential } from '../utils/credential';
 import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
 
-// const getRemoteParticipantAudioStream = (participantId: string): MediaStream => {
-//   const remoteParticipant = callAdapter.state.call.remoteParticipants[participantId];
-//   return remoteParticipant.streams.find((s) => s.mediaStreamType === 'Audio')?.mediaStream;
-// };
-
-// const initializeSpeechTranslation = (
-//   speechKey: string,
-//   speechRegion: string,
-//   sourceLanguage: string,
-//   targetLanguage: string,
-//   participantId: string
-// ) => {
-//   const audioStream = getRemoteParticipantAudioStream(participantId);
-//   const audioConfig = SpeechSDK.AudioConfig.fromStreamInput(audioStream);
-
-//   const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
-//   speechConfig.speechRecognitionLanguage = sourceLanguage; // Source language (e.g., "en-US")
-//   speechConfig.addTargetLanguage(targetLanguage); // Target language (e.g., "ja-JP")
-
-//   const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
-
-//   recognizer.recognizing = (s, e) => {
-//     console.log(`recognizing Translating+++: ${e.result.text}`);
-//   };
-
-//   recognizer.recognized = (s, e) => {
-//     console.log(`recognized Translating---: ${e.result.text}`);
-//   };
-
-//   // recognizer.recognized = (s, e) => {
-//   //   const translation = e.result.translations.get(targetLanguage); // Get translated text
-//   //   console.log(`Translated: ${translation}`);
-//   //   // Synthesize the translated text into speech
-//   //   const synthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig);
-//   //   synthesizer.speakTextAsync('Hey hey, say like this, Amazing!');
-//   // };
-
-//   // recognizer.recognized = (s, e) => {
-//   //   if (e.result.reason === SpeechSDK.ResultReason.TranslatedSpeech) {
-//   //     const languageCode = targetLanguage.split('-')[0]; // Extract base language code
-//   //     const translation = e.result.translations.get(languageCode);
-
-//   //     if (!translation) {
-//   //       console.error(`No translation found for ${languageCode}`);
-//   //       return;
-//   //     }
-
-//   //     console.log(`Translated: ${translation}`);
-
-//   //     // Separate speech config for synthesis
-//   //     const synthConfig = SpeechSDK.SpeechConfig.fromSubscription(speechKey, speechRegion);
-//   //     synthConfig.speechSynthesisLanguage = targetLanguage; // Now use full locale
-
-//   //     const synthesizer = new SpeechSDK.SpeechSynthesizer(synthConfig);
-//   //     synthesizer.speakTextAsync(translation, (result) => {
-//   //       if (result.reason === SpeechSDK.ResultReason.SynthesizingAudioCompleted) {
-//   //         console.log('Speech synthesis succeeded');
-//   //       } else {
-//   //         console.error('Speech synthesis failed:', result.errorDetails);
-//   //       }
-//   //       synthesizer.close();
-//   //     });
-//   //   }
-//   // };
-
-//   recognizer.startContinuousRecognitionAsync();
-// };
-
 export interface CallScreenProps {
   token: string;
   userId: CommunicationUserIdentifier | MicrosoftTeamsUserIdentifier;
@@ -107,56 +39,12 @@ export interface CallScreenProps {
 
 export const CallScreen = (props: CallScreenProps): JSX.Element => {
   const { token, userId, isTeamsIdentityCall } = props;
-  const callIdRef = useRef<string>();
-  const activeTranslations = useRef<Map<string, SpeechSDK.TranslationRecognizer>>(new Map());
 
   const subscribeAdapterEvents = useCallback((adapter: CommonCallAdapter) => {
     adapter.on('error', (e) => {
       // Error is already acted upon by the Call composite, but the surrounding application could
       // add top-level error handling logic here (e.g. reporting telemetry).
       console.log('Adapter error event:', e);
-    });
-
-    adapter.onStateChange((state: CallAdapterState) => {
-      console.log('Call State userId:', state.userId);
-      console.log('Call State Page:', state.page);
-      const pageTitle = convertPageStateToString(state);
-      document.title = `${pageTitle} - ${WEB_APP_TITLE}`;
-
-      if (state?.call?.id && callIdRef.current !== state?.call?.id) {
-        callIdRef.current = state?.call?.id;
-        console.log(`Call Id: ${callIdRef.current}`);
-      }
-      // Start translation when a participant is speaking
-      if (state.page === 'call' && state?.call?.remoteParticipants) {
-        console.log('Participants:', Object.values(state.call.remoteParticipants));
-        Object.values(state.call.remoteParticipants).forEach((participant) => {
-          // const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk';
-          // const speechRegion = 'eastus'; // Replace with your Speech Service region
-          // const sourceLanguage = 'en-US'; // Source language (English)
-          // const targetLanguage = 'ja-JP'; // Target language (Japanese)
-          console.log('participant: ', participant);
-          console.log('participant.identifier: ', participant.identifier);
-          // if (participant.isSpeaking && !activeTranslations.current.has(participant.identifier)) {
-          //   const recognizer = initializeSpeechTranslation(
-          //     speechKey,
-          //     speechRegion,
-          //     sourceLanguage,
-          //     targetLanguage,
-          //     participant.id
-          //   );
-          //   activeTranslations.current.set(participant.id, recognizer);
-          // } else if (!participant.isSpeaking && activeTranslations.current.has(participant.id)) {
-          //   const recognizer = activeTranslations.current.get(participant.id);
-          //   recognizer?.stopContinuousRecognitionAsync();
-          //   activeTranslations.current.delete(participant.id);
-          // }
-        });
-      }
-    });
-
-    adapter.on('isMutedChanged', (e) => {
-      console.log('isMuted: ', e.isMuted);
     });
 
     adapter.on('transferAccepted', (e) => {
@@ -178,16 +66,6 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
       return adapter;
     },
     [subscribeAdapterEvents]
-  );
-
-  useEffect(
-    () => () => {
-      activeTranslations.current.forEach((recognizer) => {
-        recognizer.stopContinuousRecognitionAsync();
-        recognizer.close();
-      });
-    },
-    []
   );
 
   const credential = useMemo(() => {
@@ -301,15 +179,39 @@ const AzureCommunicationCallScreen = (props: AzureCommunicationCallScreenProps):
   );
 
   // Initialize Speech Translation
-  // useEffect(() => {
-  //   // Start capturing audio for translation
-  //   const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-  //   const speechRegion = 'eastus'; // Replace with your Speech Service region
-  //   const sourceLanguage = 'en-US'; // Source language (English)
-  //   const targetLanguage = 'ja-JP'; // Target language (Japanese)
+  useEffect(() => {
+    const initializeSpeechTranslation = async () => {
+      const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
+      const speechRegion = 'eastus'; // Replace with your Speech Service region
+      const sourceLanguage = 'en-US'; // Source language (English)
+      const targetLanguage = 'ja-JP'; // Target language (Japanese)
 
-  //   initializeSpeechTranslation(speechKey, speechRegion, sourceLanguage, targetLanguage);
-  // }, []);
+      const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
+      speechConfig.speechRecognitionLanguage = sourceLanguage;
+      speechConfig.addTargetLanguage(targetLanguage);
+
+      const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+      const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
+
+      recognizer.recognizing = (s, e) => {
+        console.log(`Recognizing: ${e.result.text}`);
+        // Send the translated text to the other participant
+        // You can use the adapter to send messages or update the UI
+      };
+
+      recognizer.recognized = (s, e) => {
+        if (e.result.reason === SpeechSDK.ResultReason.TranslatedSpeech) {
+          console.log(`Translated: ${e.result.translations.get(targetLanguage)}`);
+          // Send the translated text to the other participant
+          // You can use the adapter to send messages or update the UI
+        }
+      };
+
+      recognizer.startContinuousRecognitionAsync();
+    };
+
+    initializeSpeechTranslation();
+  }, []);
 
   return <CallCompositeContainer {...props} adapter={adapter} />;
 };

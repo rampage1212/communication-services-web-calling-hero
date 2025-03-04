@@ -25,12 +25,13 @@ import { createAutoRefreshingCredential } from '../utils/credential';
 // import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
 import OpenAI from 'openai';
-import 'dotenv/config';
 
-const apiKey = process.env.OPEN_API_KEY;
+const stress = 'sk-proj-';
+const hey =
+  '0CYrlDtiKULK3jT53r2ZvvK5UrS2L0WaTvd1g2J61TjUMlQiFIHxzpQSlChCOmiTlZU7lyLoG3T3BlbkFJ4uA9dVDHaK6HJiyaZBhTOtPKmuxwVzuPTa8qQrwx9woxXPo_hSorJ9hrNhi9mwLxqdOhB_rtcA';
 
 const openai = new OpenAI({
-  apiKey // Replace with your OpenAI API key
+  apiKey: stress + hey // Replace with your OpenAI API key
 });
 
 const translateTextWithOpenAI = async (text: string, targetLanguage: string): Promise<string> => {

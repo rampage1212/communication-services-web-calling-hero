@@ -1,9 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import dotenv from 'dotenv';
-
-dotenv.config();
-
 import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
 
 import {
@@ -29,6 +25,10 @@ import { createAutoRefreshingCredential } from '../utils/credential';
 // import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
 import OpenAI from 'openai';
+
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const apiKey = process.env.OPEN_API_KEY;
 

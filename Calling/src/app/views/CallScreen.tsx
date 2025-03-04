@@ -12,7 +12,6 @@ import {
   AzureCommunicationCallAdapterOptions,
   CallAdapter,
   CallAdapterLocator,
-  CallAdapterState,
   CommonCallAdapter,
   onResolveDeepNoiseSuppressionDependencyLazy,
   onResolveVideoEffectDependencyLazy,

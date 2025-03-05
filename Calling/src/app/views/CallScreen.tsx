@@ -20,7 +20,7 @@ import {
   useTeamsCallAdapter
 } from '@azure/communication-react';
 import type { Profile, StartCallIdentifier, TeamsAdapterOptions } from '@azure/communication-react';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { createAutoRefreshingCredential } from '../utils/credential';
 // import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
@@ -108,30 +108,76 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
     return createAutoRefreshingCredential(toFlatCommunicationIdentifier(userId), token);
   }, [token, userId, isTeamsIdentityCall]);
 
-  const initializeSpeechTranslation = async () => {
-    console.log('initializeSpeechTranslation called');
+  const recognitionRef = useRef<SpeechSDK.SpeechRecognizer | null>(null);
+
+  useEffect(() => {
     const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
     const speechRegion = 'eastus'; // Replace with your Speech Service region
-    const sourceLanguage = 'en-US'; // Source language (English)
+    const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(speechKey, speechRegion);
+    recognitionRef.current = new SpeechSDK.SpeechRecognizer(speechConfig);
+
+    if (recognitionRef.current) {
+      recognitionRef.current.recognizing = (s, e) => {
+        console.log(`Recognizing: ${e.result.text}`);
+      };
+
+      recognitionRef.current.recognized = (s, e) => {
+        if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
+          console.log(`Recognized: ${e.result.text}`);
+        }
+      };
+
+      recognitionRef.current.canceled = (s, e) => {
+        console.error(`Recognition canceled: ${e.reason}`);
+        if (e.reason === SpeechSDK.CancellationReason.Error) {
+          console.error(`Error details: ${e.errorDetails}`);
+        }
+      };
+
+      recognitionRef.current.sessionStopped = (s, e) => {
+        console.log('Session stopped.');
+        recognitionRef.current?.stopContinuousRecognitionAsync();
+      };
+    }
+
+    return () => {
+      recognitionRef.current?.close();
+    };
+  }, []);
+
+  const startRecognition = () => {
+    recognitionRef.current?.startContinuousRecognitionAsync();
+  };
+
+  // const stopRecognition = () => {
+  //   recognitionRef.current?.stopContinuousRecognitionAsync();
+  // };
+
+  const initializeSpeechTranslation = async () => {
+    console.log('initializeSpeechTranslation called');
+    startRecognition();
+    // const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
+    // const speechRegion = 'eastus'; // Replace with your Speech Service region
+    // const sourceLanguage = 'en-US'; // Source language (English)
     // const targetLanguage = 'ja-JP'; // Target language (Japanese)
 
-    const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
-    speechConfig.speechRecognitionLanguage = sourceLanguage;
+    // const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
+    // speechConfig.speechRecognitionLanguage = sourceLanguage;
     // speechConfig.addTargetLanguage(targetLanguage);
 
-    const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
-    const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
+    // const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+    // const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
 
-    recognizer.recognizing = async (s, e) => {
-      const recognizedText = e.result.text;
-      console.log(`Recognizing: ${recognizedText}`);
+    // recognizer.recognizing = async (s, e) => {
+    //   const recognizedText = e.result.text;
+    //   console.log(`Recognizing: ${recognizedText}`);
 
-      // Translate recognized text using OpenAI
-      // const translatedText = await translateTextWithOpenAI(recognizedText, targetLanguage);
-      // console.log(`Translated: ${translatedText}`);
+    //   // Translate recognized text using OpenAI
+    //   // const translatedText = await translateTextWithOpenAI(recognizedText, targetLanguage);
+    //   // console.log(`Translated: ${translatedText}`);
 
-      // Send the translated text to the other participant or update the UI
-    };
+    //   // Send the translated text to the other participant or update the UI
+    // };
 
     // recognizer.recognized = async (s, e) => {
     //   if (e.result.reason === SpeechSDK.ResultReason.TranslatedSpeech) {
@@ -146,7 +192,7 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
     //   }
     // };
 
-    recognizer.startContinuousRecognitionAsync();
+    // recognizer.startContinuousRecognitionAsync();
   };
   // Initialize Speech Translation
   useEffect(() => {

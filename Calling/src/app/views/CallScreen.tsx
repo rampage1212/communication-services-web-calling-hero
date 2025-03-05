@@ -24,35 +24,35 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { createAutoRefreshingCredential } from '../utils/credential';
 // import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
-import OpenAI from 'openai';
+// import OpenAI from 'openai';
 
-const stress = 'sk-proj-';
-const hey =
-  '0CYrlDtiKULK3jT53r2ZvvK5UrS2L0WaTvd1g2J61TjUMlQiFIHxzpQSlChCOmiTlZU7lyLoG3T3BlbkFJ4uA9dVDHaK6HJiyaZBhTOtPKmuxwVzuPTa8qQrwx9woxXPo_hSorJ9hrNhi9mwLxqdOhB_rtcA';
+// const stress = 'sk-proj-';
+// const hey =
+//   '0CYrlDtiKULK3jT53r2ZvvK5UrS2L0WaTvd1g2J61TjUMlQiFIHxzpQSlChCOmiTlZU7lyLoG3T3BlbkFJ4uA9dVDHaK6HJiyaZBhTOtPKmuxwVzuPTa8qQrwx9woxXPo_hSorJ9hrNhi9mwLxqdOhB_rtcA';
 
-const openai = new OpenAI({
-  apiKey: stress + hey, // Replace with your OpenAI API key
-  dangerouslyAllowBrowser: true
-});
+// const openai = new OpenAI({
+//   apiKey: stress + hey, // Replace with your OpenAI API key
+//   dangerouslyAllowBrowser: true
+// });
 
-const translateTextWithOpenAI = async (text: string, targetLanguage: string): Promise<string> => {
-  try {
-    const response = await openai.chat.completions.create({
-      messages: [
-        {
-          role: 'system',
-          content: `Translate the following text to ${targetLanguage}:`
-        },
-        { role: 'user', content: text }
-      ],
-      model: 'gpt-4o-mini-realtime-preview-2024-12-17'
-    });
-    return response.choices[0].message.content || text; // Return translated text or original if translation fails
-  } catch (error) {
-    console.error('Error translating text with OpenAI:', error);
-    return text; // Fallback to original text on error
-  }
-};
+// const translateTextWithOpenAI = async (text: string, targetLanguage: string): Promise<string> => {
+//   try {
+//     const response = await openai.chat.completions.create({
+//       messages: [
+//         {
+//           role: 'system',
+//           content: `Translate the following text to ${targetLanguage}:`
+//         },
+//         { role: 'user', content: text }
+//       ],
+//       model: 'gpt-4o-mini-realtime-preview-2024-12-17'
+//     });
+//     return response.choices[0].message.content || text; // Return translated text or original if translation fails
+//   } catch (error) {
+//     console.error('Error translating text with OpenAI:', error);
+//     return text; // Fallback to original text on error
+//   }
+// };
 
 export interface CallScreenProps {
   token: string;

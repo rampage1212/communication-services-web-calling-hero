@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
+// import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
 
 import {
   AzureCommunicationTokenCredential,
@@ -20,7 +20,7 @@ import {
   useTeamsCallAdapter
 } from '@azure/communication-react';
 import type { CallAdapterState, Profile, StartCallIdentifier, TeamsAdapterOptions } from '@azure/communication-react';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { createAutoRefreshingCredential } from '../utils/credential';
 import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
@@ -87,11 +87,6 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
 
     adapter.on('transferAccepted', (e) => {
       console.log('Call being transferred to: ' + e);
-      e.targetCall.on('remoteAudioStreamsUpdated', (remoteAudioStreams) => {
-        remoteAudioStreams.added.forEach((remoteAudioStream) => {
-          console.log('remoteAudioStream: ', remoteAudioStream);
-        });
-      });
     });
 
     adapter.on('isSpeakingChanged', (e) => {
@@ -100,49 +95,49 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
     });
 
     // New remote participant handlers
-    adapter.on('participantsJoined', (e) => {
-      e.joined.forEach((remoteParticipant) => {
-        console.log('remoteParticipant: ', remoteParticipant);
-        // Handle audio stream updates
-        // remoteParticipant.on('videoStreamsUpdated', (audioStreams) => {
-        //   console.log('videoStreamsUpdated: ', audioStreams);
-        //   audioStreams.added.forEach(async (audioStream) => {
-        //     console.log('audioStream isAvailable: ', audioStream.isAvailable);
-        //     if (audioStream.isAvailable) {
-        //       // Create new recognizer for this stream
-        //       const audioInput = SpeechSDK.AudioConfig.fromStreamInput(await audioStream.getMediaStream());
+    // adapter.on('participantsJoined', (e) => {
+    //   e.joined.forEach((remoteParticipant) => {
+    //     console.log('remoteParticipant: ', remoteParticipant);
+    // Handle audio stream updates
+    // remoteParticipant.on('videoStreamsUpdated', (audioStreams) => {
+    //   console.log('videoStreamsUpdated: ', audioStreams);
+    //   audioStreams.added.forEach(async (audioStream) => {
+    //     console.log('audioStream isAvailable: ', audioStream.isAvailable);
+    //     if (audioStream.isAvailable) {
+    //       // Create new recognizer for this stream
+    //       const audioInput = SpeechSDK.AudioConfig.fromStreamInput(await audioStream.getMediaStream());
 
-        //       const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-        //       const speechRegion = 'eastus'; // Replace with your Speech Service region
+    //       const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
+    //       const speechRegion = 'eastus'; // Replace with your Speech Service region
 
-        //       const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(speechKey, speechRegion);
-        //       const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioInput);
+    //       const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(speechKey, speechRegion);
+    //       const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioInput);
 
-        //       // Store recognizer reference
-        //       remoteRecognizersRef.current.set(toFlatCommunicationIdentifier(remoteParticipant.identifier), recognizer);
+    //       // Store recognizer reference
+    //       remoteRecognizersRef.current.set(toFlatCommunicationIdentifier(remoteParticipant.identifier), recognizer);
 
-        //       // Configure recognition handlers
-        //       recognizer.recognizing = (s, e) => {
-        //         console.log(`Remote participant speech (${remoteParticipant.identifier}):`, e.result.text);
-        //       };
+    //       // Configure recognition handlers
+    //       recognizer.recognizing = (s, e) => {
+    //         console.log(`Remote participant speech (${remoteParticipant.identifier}):`, e.result.text);
+    //       };
 
-        //       recognizer.startContinuousRecognitionAsync();
-        //     }
-        //   });
-        // });
+    //       recognizer.startContinuousRecognitionAsync();
+    //     }
+    //   });
+    // });
 
-        // // Cleanup when participant leaves
-        // remoteParticipant.on('stateChanged', () => {
-        //   if (remoteParticipant.state === 'Disconnected') {
-        //     const recognizer = remoteRecognizersRef.current.get(
-        //       toFlatCommunicationIdentifier(remoteParticipant.identifier)
-        //     );
-        //     recognizer?.stopContinuousRecognitionAsync();
-        //     remoteRecognizersRef.current.delete(toFlatCommunicationIdentifier(remoteParticipant.identifier));
-        //   }
-        // });
-      });
-    });
+    // // Cleanup when participant leaves
+    // remoteParticipant.on('stateChanged', () => {
+    //   if (remoteParticipant.state === 'Disconnected') {
+    //     const recognizer = remoteRecognizersRef.current.get(
+    //       toFlatCommunicationIdentifier(remoteParticipant.identifier)
+    //     );
+    //     recognizer?.stopContinuousRecognitionAsync();
+    //     remoteRecognizersRef.current.delete(toFlatCommunicationIdentifier(remoteParticipant.identifier));
+    //   }
+    // });
+    //   });
+    // });
   }, []);
 
   const afterCallAdapterCreate = useCallback(
@@ -168,17 +163,17 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
     return createAutoRefreshingCredential(toFlatCommunicationIdentifier(userId), token);
   }, [token, userId, isTeamsIdentityCall]);
 
-  const recognitionRef = useRef<SpeechSDK.SpeechRecognizer | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
+  // const recognitionRef = useRef<SpeechSDK.SpeechRecognizer | null>(null);
+  // const audioContextRef = useRef<AudioContext | null>(null);
   // const mediaStreamSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   // const remoteRecognizersRef = useRef<Map<string, SpeechSDK.SpeechRecognizer>>(new Map());
 
-  useEffect(() => {
-    return () => {
-      recognitionRef.current?.close();
-      audioContextRef.current?.close();
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     recognitionRef.current?.close();
+  //     audioContextRef.current?.close();
+  //   };
+  // }, []);
 
   // const startRecognition = async () => {
   //   // Create an audio context

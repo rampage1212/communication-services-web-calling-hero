@@ -19,10 +19,10 @@ import {
   useAzureCommunicationCallAdapter,
   useTeamsCallAdapter
 } from '@azure/communication-react';
-import type { Profile, StartCallIdentifier, TeamsAdapterOptions } from '@azure/communication-react';
+import type { CallAdapterState, Profile, StartCallIdentifier, TeamsAdapterOptions } from '@azure/communication-react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { createAutoRefreshingCredential } from '../utils/credential';
-// import { WEB_APP_TITLE } from '../utils/AppUtils';
+import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
 // import OpenAI from 'openai';
 
@@ -66,6 +66,7 @@ export interface CallScreenProps {
 
 export const CallScreen = (props: CallScreenProps): JSX.Element => {
   const { token, userId, isTeamsIdentityCall } = props;
+  const callIdRef = useRef<string>();
 
   const subscribeAdapterEvents = useCallback((adapter: CommonCallAdapter) => {
     adapter.on('error', (e) => {
@@ -74,22 +75,29 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
       console.log('Adapter error event:', e);
     });
 
+    adapter.onStateChange((state: CallAdapterState) => {
+      const pageTitle = convertPageStateToString(state);
+      document.title = `${pageTitle} - ${WEB_APP_TITLE}`;
+
+      if (state?.call?.id && callIdRef.current !== state?.call?.id) {
+        callIdRef.current = state?.call?.id;
+        console.log(`Call Id: ${callIdRef.current}`);
+      }
+    });
+
     adapter.on('transferAccepted', (e) => {
       console.log('Call being transferred to: ' + e);
+      e.targetCall.on('remoteAudioStreamsUpdated', (remoteAudioStreams) => {
+        remoteAudioStreams.added.forEach((remoteAudioStream) => {
+          console.log('remoteAudioStream: ', remoteAudioStream);
+        });
+      });
     });
 
     adapter.on('isSpeakingChanged', (e) => {
       console.log('e.isSpeaking: ', e.isSpeaking);
       console.log('e.identifier: ', e.identifier);
     });
-
-    // adapter.on('isMutedChanged', (e) => {
-    //   if (e.isMuted) {
-    //     stopRecognition();
-    //   } else {
-    //     startRecognition();
-    //   }
-    // });
 
     // New remote participant handlers
     adapter.on('participantsJoined', (e) => {
@@ -454,20 +462,20 @@ const AzureCommunicationOutboundCallScreen = (props: AzureCommunicationCallScree
   return <CallCompositeContainer {...props} adapter={adapter} />;
 };
 
-// const convertPageStateToString = (state: CallAdapterState): string => {
-//   switch (state.page) {
-//     case 'accessDeniedTeamsMeeting':
-//       return 'error';
-//     case 'badRequest':
-//       return 'error';
-//     case 'leftCall':
-//       return 'end call';
-//     case 'removedFromCall':
-//       return 'end call';
-//     default:
-//       return `${state.page}`;
-//   }
-// };
+const convertPageStateToString = (state: CallAdapterState): string => {
+  switch (state.page) {
+    case 'accessDeniedTeamsMeeting':
+      return 'error';
+    case 'badRequest':
+      return 'error';
+    case 'leftCall':
+      return 'end call';
+    case 'removedFromCall':
+      return 'end call';
+    default:
+      return `${state.page}`;
+  }
+};
 
 const videoBackgroundImages = [
   {

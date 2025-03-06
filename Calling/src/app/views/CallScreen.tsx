@@ -94,9 +94,12 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
     // New remote participant handlers
     adapter.on('participantsJoined', (e) => {
       e.joined.forEach((remoteParticipant) => {
+        console.log('remoteParticipant: ', remoteParticipant);
         // Handle audio stream updates
         remoteParticipant.on('videoStreamsUpdated', (audioStreams) => {
+          console.log('videoStreamsUpdated: ', audioStreams);
           audioStreams.added.forEach(async (audioStream) => {
+            console.log('audioStream isAvailable: ', audioStream.isAvailable);
             if (audioStream.isAvailable) {
               // Create new recognizer for this stream
               const audioInput = SpeechSDK.AudioConfig.fromStreamInput(await audioStream.getMediaStream());

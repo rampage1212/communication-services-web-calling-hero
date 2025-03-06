@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
-// import * as SpeechSDK from 'microsoft-cognitiveservices-speech-sdk';
 
 import {
   AzureCommunicationTokenCredential,
@@ -11,6 +10,7 @@ import {
   AzureCommunicationCallAdapterOptions,
   CallAdapter,
   CallAdapterLocator,
+  CallAdapterState,
   CommonCallAdapter,
   onResolveDeepNoiseSuppressionDependencyLazy,
   onResolveVideoEffectDependencyLazy,
@@ -19,40 +19,11 @@ import {
   useAzureCommunicationCallAdapter,
   useTeamsCallAdapter
 } from '@azure/communication-react';
-import type { CallAdapterState, Profile, StartCallIdentifier, TeamsAdapterOptions } from '@azure/communication-react';
+import type { Profile, StartCallIdentifier, TeamsAdapterOptions } from '@azure/communication-react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { createAutoRefreshingCredential } from '../utils/credential';
 import { WEB_APP_TITLE } from '../utils/AppUtils';
 import { CallCompositeContainer } from './CallCompositeContainer';
-// import OpenAI from 'openai';
-
-// const stress = 'sk-proj-';
-// const hey =
-//   '0CYrlDtiKULK3jT53r2ZvvK5UrS2L0WaTvd1g2J61TjUMlQiFIHxzpQSlChCOmiTlZU7lyLoG3T3BlbkFJ4uA9dVDHaK6HJiyaZBhTOtPKmuxwVzuPTa8qQrwx9woxXPo_hSorJ9hrNhi9mwLxqdOhB_rtcA';
-
-// const openai = new OpenAI({
-//   apiKey: stress + hey, // Replace with your OpenAI API key
-//   dangerouslyAllowBrowser: true
-// });
-
-// const translateTextWithOpenAI = async (text: string, targetLanguage: string): Promise<string> => {
-//   try {
-//     const response = await openai.chat.completions.create({
-//       messages: [
-//         {
-//           role: 'system',
-//           content: `Translate the following text to ${targetLanguage}:`
-//         },
-//         { role: 'user', content: text }
-//       ],
-//       model: 'gpt-4o-mini-realtime-preview-2024-12-17'
-//     });
-//     return response.choices[0].message.content || text; // Return translated text or original if translation fails
-//   } catch (error) {
-//     console.error('Error translating text with OpenAI:', error);
-//     return text; // Fallback to original text on error
-//   }
-// };
 
 export interface CallScreenProps {
   token: string;
@@ -74,7 +45,6 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
       // add top-level error handling logic here (e.g. reporting telemetry).
       console.log('Adapter error event:', e);
     });
-
     adapter.onStateChange((state: CallAdapterState) => {
       const pageTitle = convertPageStateToString(state);
       document.title = `${pageTitle} - ${WEB_APP_TITLE}`;
@@ -84,60 +54,9 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
         console.log(`Call Id: ${callIdRef.current}`);
       }
     });
-
     adapter.on('transferAccepted', (e) => {
       console.log('Call being transferred to: ' + e);
     });
-
-    adapter.on('isSpeakingChanged', (e) => {
-      console.log('e.isSpeaking: ', e.isSpeaking);
-      console.log('e.identifier: ', e.identifier);
-    });
-
-    // New remote participant handlers
-    // adapter.on('participantsJoined', (e) => {
-    //   e.joined.forEach((remoteParticipant) => {
-    //     console.log('remoteParticipant: ', remoteParticipant);
-    // Handle audio stream updates
-    // remoteParticipant.on('videoStreamsUpdated', (audioStreams) => {
-    //   console.log('videoStreamsUpdated: ', audioStreams);
-    //   audioStreams.added.forEach(async (audioStream) => {
-    //     console.log('audioStream isAvailable: ', audioStream.isAvailable);
-    //     if (audioStream.isAvailable) {
-    //       // Create new recognizer for this stream
-    //       const audioInput = SpeechSDK.AudioConfig.fromStreamInput(await audioStream.getMediaStream());
-
-    //       const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-    //       const speechRegion = 'eastus'; // Replace with your Speech Service region
-
-    //       const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(speechKey, speechRegion);
-    //       const recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioInput);
-
-    //       // Store recognizer reference
-    //       remoteRecognizersRef.current.set(toFlatCommunicationIdentifier(remoteParticipant.identifier), recognizer);
-
-    //       // Configure recognition handlers
-    //       recognizer.recognizing = (s, e) => {
-    //         console.log(`Remote participant speech (${remoteParticipant.identifier}):`, e.result.text);
-    //       };
-
-    //       recognizer.startContinuousRecognitionAsync();
-    //     }
-    //   });
-    // });
-
-    // // Cleanup when participant leaves
-    // remoteParticipant.on('stateChanged', () => {
-    //   if (remoteParticipant.state === 'Disconnected') {
-    //     const recognizer = remoteRecognizersRef.current.get(
-    //       toFlatCommunicationIdentifier(remoteParticipant.identifier)
-    //     );
-    //     recognizer?.stopContinuousRecognitionAsync();
-    //     remoteRecognizersRef.current.delete(toFlatCommunicationIdentifier(remoteParticipant.identifier));
-    //   }
-    // });
-    //   });
-    // });
   }, []);
 
   const afterCallAdapterCreate = useCallback(
@@ -162,101 +81,6 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
     }
     return createAutoRefreshingCredential(toFlatCommunicationIdentifier(userId), token);
   }, [token, userId, isTeamsIdentityCall]);
-
-  // const recognitionRef = useRef<SpeechSDK.SpeechRecognizer | null>(null);
-  // const audioContextRef = useRef<AudioContext | null>(null);
-  // const mediaStreamSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
-  // const remoteRecognizersRef = useRef<Map<string, SpeechSDK.SpeechRecognizer>>(new Map());
-
-  // useEffect(() => {
-  //   return () => {
-  //     recognitionRef.current?.close();
-  //     audioContextRef.current?.close();
-  //   };
-  // }, []);
-
-  // const startRecognition = async () => {
-  //   // Create an audio context
-  //   // eslint-disable-next-line
-  //   audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-
-  //   // Assuming you have access to the MediaStream from the call
-  //   const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-  //   // Create a MediaStreamAudioSourceNode
-  //   mediaStreamSourceRef.current = audioContextRef.current.createMediaStreamSource(mediaStream);
-
-  //   // Create an AudioConfig from MediaStream
-  //   const audioInput = SpeechSDK.AudioConfig.fromStreamInput(mediaStream);
-
-  //   const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-  //   const speechRegion = 'eastus'; // Replace with your Speech Service region
-  //   const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(speechKey, speechRegion);
-
-  //   recognitionRef.current = new SpeechSDK.SpeechRecognizer(speechConfig, audioInput);
-
-  //   // Set up event handlers
-  //   recognitionRef.current.recognizing = (s, e) => {
-  //     console.log(`Recognizing: ${e.result.text}`);
-  //   };
-
-  //   recognitionRef.current.recognized = (s, e) => {
-  //     if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
-  //       console.log(`Recognized: ${e.result.text}`);
-  //     }
-  //   };
-
-  //   recognitionRef.current.canceled = (s, e) => {
-  //     console.error(`Recognition canceled: ${e.reason}`);
-  //     if (e.reason === SpeechSDK.CancellationReason.Error) {
-  //       console.error(`Error details: ${e.errorDetails}`);
-  //     }
-  //   };
-
-  //   recognitionRef.current.sessionStopped = (s, e) => {
-  //     console.log('Session stopped.');
-  //     recognitionRef.current?.stopContinuousRecognitionAsync();
-  //   };
-
-  //   // Start continuous recognition
-  //   recognitionRef.current.startContinuousRecognitionAsync();
-  // };
-
-  // const stopRecognition = () => {
-  //   recognitionRef.current?.stopContinuousRecognitionAsync();
-  // };
-
-  // const initializeSpeechTranslation = async () => {
-  //   // const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-  //   // const speechRegion = 'eastus'; // Replace with your Speech Service region
-  //   // const sourceLanguage = 'en-US'; // Source language (English)
-  //   // const targetLanguage = 'ja-JP'; // Target language (Japanese)
-  //   // const speechConfig = SpeechSDK.SpeechTranslationConfig.fromSubscription(speechKey, speechRegion);
-  //   // speechConfig.speechRecognitionLanguage = sourceLanguage;
-  //   // speechConfig.addTargetLanguage(targetLanguage);
-  //   // const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
-  //   // const recognizer = new SpeechSDK.TranslationRecognizer(speechConfig, audioConfig);
-  //   // recognizer.recognizing = async (s, e) => {
-  //   //   const recognizedText = e.result.text;
-  //   //   console.log(`Recognizing: ${recognizedText}`);
-  //   //   // Translate recognized text using OpenAI
-  //   //   // const translatedText = await translateTextWithOpenAI(recognizedText, targetLanguage);
-  //   //   // console.log(`Translated: ${translatedText}`);
-  //   //   // Send the translated text to the other participant or update the UI
-  //   // };
-  //   // recognizer.recognized = async (s, e) => {
-  //   //   if (e.result.reason === SpeechSDK.ResultReason.TranslatedSpeech) {
-  //   //     const recognizedText = e.result.text;
-  //   //     console.log(`Recognized: ${recognizedText}`);
-  //   //     // Translate recognized text using OpenAI
-  //   //     const translatedText = await translateTextWithOpenAI(recognizedText, targetLanguage);
-  //   //     console.log(`Translated: ${translatedText}`);
-  //   //     // Send the translated text to the other participant or update the UI
-  //   //   }
-  //   // };
-  //   // recognizer.startContinuousRecognitionAsync();
-  // };
-  // Initialize Speech Translation
 
   if (isTeamsIdentityCall) {
     return <TeamsCallScreen afterCreate={afterTeamsCallAdapterCreate} credential={credential} {...props} />;
@@ -291,26 +115,11 @@ const TeamsCallScreen = (props: TeamsCallScreenProps): JSX.Element => {
         videoBackgroundImages
       },
       reactionResources: {
-        likeReaction: {
-          url: 'assets/reactions/likeEmoji.png',
-          frameCount: 102
-        },
-        heartReaction: {
-          url: 'assets/reactions/heartEmoji.png',
-          frameCount: 102
-        },
-        laughReaction: {
-          url: 'assets/reactions/laughEmoji.png',
-          frameCount: 102
-        },
-        applauseReaction: {
-          url: 'assets/reactions/clapEmoji.png',
-          frameCount: 102
-        },
-        surprisedReaction: {
-          url: 'assets/reactions/surprisedEmoji.png',
-          frameCount: 102
-        }
+        likeReaction: { url: 'assets/reactions/likeEmoji.png', frameCount: 102 },
+        heartReaction: { url: 'assets/reactions/heartEmoji.png', frameCount: 102 },
+        laughReaction: { url: 'assets/reactions/laughEmoji.png', frameCount: 102 },
+        applauseReaction: { url: 'assets/reactions/clapEmoji.png', frameCount: 102 },
+        surprisedReaction: { url: 'assets/reactions/surprisedEmoji.png', frameCount: 102 }
       }
     }),
     []
@@ -356,26 +165,11 @@ const AzureCommunicationCallScreen = (props: AzureCommunicationCallScreenProps):
         callBusy: { url: 'assets/sounds/callBusy.mp3' }
       },
       reactionResources: {
-        likeReaction: {
-          url: 'assets/reactions/likeEmoji.png',
-          frameCount: 102
-        },
-        heartReaction: {
-          url: 'assets/reactions/heartEmoji.png',
-          frameCount: 102
-        },
-        laughReaction: {
-          url: 'assets/reactions/laughEmoji.png',
-          frameCount: 102
-        },
-        applauseReaction: {
-          url: 'assets/reactions/clapEmoji.png',
-          frameCount: 102
-        },
-        surprisedReaction: {
-          url: 'assets/reactions/surprisedEmoji.png',
-          frameCount: 102
-        }
+        likeReaction: { url: 'assets/reactions/likeEmoji.png', frameCount: 102 },
+        heartReaction: { url: 'assets/reactions/heartEmoji.png', frameCount: 102 },
+        laughReaction: { url: 'assets/reactions/laughEmoji.png', frameCount: 102 },
+        applauseReaction: { url: 'assets/reactions/clapEmoji.png', frameCount: 102 },
+        surprisedReaction: { url: 'assets/reactions/surprisedEmoji.png', frameCount: 102 }
       },
       alternateCallerId: adapterArgs.alternateCallerId
     };
@@ -413,26 +207,11 @@ const AzureCommunicationOutboundCallScreen = (props: AzureCommunicationCallScree
         callBusy: { url: 'assets/sounds/callBusy.mp3' }
       },
       reactionResources: {
-        likeReaction: {
-          url: 'assets/reactions/likeEmoji.png',
-          frameCount: 102
-        },
-        heartReaction: {
-          url: 'assets/reactions/heartEmoji.png',
-          frameCount: 102
-        },
-        laughReaction: {
-          url: 'assets/reactions/laughEmoji.png',
-          frameCount: 102
-        },
-        applauseReaction: {
-          url: 'assets/reactions/clapEmoji.png',
-          frameCount: 102
-        },
-        surprisedReaction: {
-          url: 'assets/reactions/surprisedEmoji.png',
-          frameCount: 102
-        }
+        likeReaction: { url: 'assets/reactions/likeEmoji.png', frameCount: 102 },
+        heartReaction: { url: 'assets/reactions/heartEmoji.png', frameCount: 102 },
+        laughReaction: { url: 'assets/reactions/laughEmoji.png', frameCount: 102 },
+        applauseReaction: { url: 'assets/reactions/clapEmoji.png', frameCount: 102 },
+        surprisedReaction: { url: 'assets/reactions/surprisedEmoji.png', frameCount: 102 }
       },
       onFetchProfile: async (userId: string, defaultProfile?: Profile): Promise<Profile | undefined> => {
         if (userId === '<28:orgid:Enter your teams app here>') {

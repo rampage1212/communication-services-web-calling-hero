@@ -116,44 +116,61 @@ export const CallScreen = (props: CallScreenProps): JSX.Element => {
   }, [token, userId, isTeamsIdentityCall]);
 
   const recognitionRef = useRef<SpeechSDK.SpeechRecognizer | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const mediaStreamSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
 
   useEffect(() => {
-    const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
-    const speechRegion = 'eastus'; // Replace with your Speech Service region
-    const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(speechKey, speechRegion);
-    recognitionRef.current = new SpeechSDK.SpeechRecognizer(speechConfig);
-
-    if (recognitionRef.current) {
-      recognitionRef.current.recognizing = (s, e) => {
-        console.log(`Recognizing: ${e.result.text}`);
-      };
-
-      recognitionRef.current.recognized = (s, e) => {
-        if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
-          console.log(`Recognized: ${e.result.text}`);
-        }
-      };
-
-      recognitionRef.current.canceled = (s, e) => {
-        console.error(`Recognition canceled: ${e.reason}`);
-        if (e.reason === SpeechSDK.CancellationReason.Error) {
-          console.error(`Error details: ${e.errorDetails}`);
-        }
-      };
-
-      recognitionRef.current.sessionStopped = (s, e) => {
-        console.log('Session stopped.');
-        recognitionRef.current?.stopContinuousRecognitionAsync();
-      };
-    }
-
     return () => {
       recognitionRef.current?.close();
+      audioContextRef.current?.close();
     };
   }, []);
 
-  const startRecognition = () => {
-    recognitionRef.current?.startContinuousRecognitionAsync();
+  const startRecognition = async () => {
+    // Create an audio context
+    // eslint-disable-next-line
+    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+    // Assuming you have access to the MediaStream from the call
+    const mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+    // Create a MediaStreamAudioSourceNode
+    mediaStreamSourceRef.current = audioContextRef.current.createMediaStreamSource(mediaStream);
+
+    // Create an AudioConfig from MediaStream
+    const audioInput = SpeechSDK.AudioConfig.fromStreamInput(mediaStream);
+
+    const speechKey = 'D3If46lhxGGi9J8TveBGhzDmU7nU2VTK860icmwPVvMvgx4JY9ABJQQJ99BBACYeBjFXJ3w3AAAYACOGefwk'; // Replace with your Speech Service key
+    const speechRegion = 'eastus'; // Replace with your Speech Service region
+    const speechConfig = SpeechSDK.SpeechConfig.fromSubscription(speechKey, speechRegion);
+
+    recognitionRef.current = new SpeechSDK.SpeechRecognizer(speechConfig, audioInput);
+
+    // Set up event handlers
+    recognitionRef.current.recognizing = (s, e) => {
+      console.log(`Recognizing: ${e.result.text}`);
+    };
+
+    recognitionRef.current.recognized = (s, e) => {
+      if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
+        console.log(`Recognized: ${e.result.text}`);
+      }
+    };
+
+    recognitionRef.current.canceled = (s, e) => {
+      console.error(`Recognition canceled: ${e.reason}`);
+      if (e.reason === SpeechSDK.CancellationReason.Error) {
+        console.error(`Error details: ${e.errorDetails}`);
+      }
+    };
+
+    recognitionRef.current.sessionStopped = (s, e) => {
+      console.log('Session stopped.');
+      recognitionRef.current?.stopContinuousRecognitionAsync();
+    };
+
+    // Start continuous recognition
+    recognitionRef.current.startContinuousRecognitionAsync();
   };
 
   const stopRecognition = () => {
